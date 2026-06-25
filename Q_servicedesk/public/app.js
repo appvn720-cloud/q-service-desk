@@ -22,6 +22,27 @@ const minutesOf = (hhmm) => {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + m;
 };
+const parseDigitalTime = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 3) {
+    return `0${digits[0]}:${digits.slice(1)}`;
+  }
+  if (digits.length === 4) {
+    return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+  }
+  if (/^\d{1,2}:\d{2}$/.test(raw)) {
+    const [h, m] = raw.split(":");
+    return `${h.padStart(2, "0")}:${m}`;
+  }
+  return raw;
+};
+const isValidDigitalTime = (value) => {
+  if (!/^\d{2}:\d{2}$/.test(value)) return false;
+  const [hour, minute] = value.split(":").map(Number);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+};
 const currentMinutes = () => {
   const d = new Date();
   return d.getHours() * 60 + d.getMinutes();
@@ -37,6 +58,9 @@ function toast(message, isError = false) {
 function requireConfigured() {
   $("setupNotice").classList.toggle("hidden", isConfigured);
   if (!isConfigured) {
+    $("appShell").classList.add("auth-only");
+    $("mainSidebar").classList.add("hidden");
+    $("appView").classList.add("hidden");
     $("authView").classList.remove("hidden");
     return false;
   }
@@ -267,13 +291,27 @@ async function saveAgent(event) {
   event.preventDefault();
   const name = $("agentName").value.trim();
   if (!name) return toast("กรุณาใส่ชื่อ T2", true);
+  const workStart = parseDigitalTime($("agentStart").value);
+  const breakStart = parseDigitalTime($("agentBreakStart").value);
+  const breakEnd = parseDigitalTime($("agentBreakEnd").value);
+  const workEnd = parseDigitalTime($("agentEnd").value);
+  $("agentStart").value = workStart;
+  $("agentBreakStart").value = breakStart;
+  $("agentBreakEnd").value = breakEnd;
+  $("agentEnd").value = workEnd;
+  if (!isValidDigitalTime(workStart) || !isValidDigitalTime(workEnd)) {
+    return toast("กรุณาใส่เวลาเข้างานและเลิกงานเป็น HH:MM เช่น 08:00", true);
+  }
+  if ((breakStart && !isValidDigitalTime(breakStart)) || (breakEnd && !isValidDigitalTime(breakEnd))) {
+    return toast("กรุณาใส่เวลาพักเป็น HH:MM เช่น 12:00", true);
+  }
   const payload = {
     name,
     business: $("agentBusiness").value,
-    work_start: $("agentStart").value,
-    break_start: $("agentBreakStart").value || null,
-    break_end: $("agentBreakEnd").value || null,
-    work_end: $("agentEnd").value,
+    work_start: workStart,
+    break_start: breakStart || null,
+    break_end: breakEnd || null,
+    work_end: workEnd,
     active: true,
     updated_at: nowIso()
   };
@@ -386,6 +424,14 @@ function bindEvents() {
   });
   $("agentForm").addEventListener("submit", saveAgent);
   $("agentClearBtn").addEventListener("click", clearAgentForm);
+  document.querySelectorAll(".digital-time").forEach((input) => {
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/[^\d:]/g, "").slice(0, 5);
+    });
+    input.addEventListener("blur", () => {
+      input.value = parseDigitalTime(input.value);
+    });
+  });
   ["filterText", "filterBusiness", "filterStatus"].forEach((id) => $(id).addEventListener("input", renderTickets));
   $("exportBtn").addEventListener("click", exportExcel);
   $("deleteSelectedBtn").addEventListener("click", () => confirmAction("ลบรายการที่เลือก", "ยืนยันลบรายการ Ticket ที่เลือกหรือไม่", () => deleteTickets([...state.selectedTickets])));
@@ -466,6 +512,8 @@ function showView(viewId) {
 }
 
 async function startApp() {
+  $("appShell").classList.remove("auth-only");
+  $("mainSidebar").classList.remove("hidden");
   $("authView").classList.add("hidden");
   $("appView").classList.remove("hidden");
   await loadProfile();

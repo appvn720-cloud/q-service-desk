@@ -160,6 +160,24 @@ grant execute on function public.create_ticket_with_agent_load(text, text, uuid,
 revoke all on function public.update_ticket_status_with_agent_load(uuid, text) from public;
 grant execute on function public.update_ticket_status_with_agent_load(uuid, text) to authenticated;
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to authenticated;
+
 alter table public.profiles enable row level security;
 alter table public.agents enable row level security;
 alter table public.tickets enable row level security;
@@ -179,18 +197,8 @@ using (true);
 create policy "profiles_write_authenticated"
 on public.profiles for all
 to authenticated
-using (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
-)
-with check (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
-);
+using (public.is_admin())
+with check (public.is_admin());
 
 create policy "agents_select_authenticated"
 on public.agents for select
@@ -200,18 +208,8 @@ using (true);
 create policy "agents_write_authenticated"
 on public.agents for all
 to authenticated
-using (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
-)
-with check (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
-);
+using (public.is_admin())
+with check (public.is_admin());
 
 create policy "tickets_select_authenticated"
 on public.tickets for select

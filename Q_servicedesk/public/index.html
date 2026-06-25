@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Q Service Desk</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">Q</div>
+        <div>
+          <h1>Service Desk</h1>
+          <p>Presented By Pumin</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="queueView">คิวงาน</button>
+        <button class="nav-item" data-view="peopleView">เวลาทำงาน T2</button>
+        <button class="nav-item" data-view="ticketsView">รายการ Ticket</button>
+        <button class="nav-item" data-view="dashboardView">แดชบอร์ด</button>
+        <button class="nav-item admin-only" data-view="usersView">ผู้ใช้งาน</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="themeToggle" class="ghost-btn" type="button">Dark Mode</button>
+        <button id="logoutBtn" class="danger-btn" type="button">ออกจากระบบ</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section id="setupNotice" class="notice hidden">
+        <strong>ยังไม่ได้ตั้งค่า Supabase</strong>
+        ใส่ค่า SUPABASE_URL และ SUPABASE_ANON_KEY ใน Netlify Environment variables หรือไฟล์ public/config.js ก่อนใช้งานจริง
+      </section>
+
+      <section id="authView" class="auth-card">
+        <div class="auth-panel">
+          <h2>เข้าสู่ระบบ</h2>
+          <p>Admin ใช้สร้างบัญชี T1 และจัดการข้อมูลหลัก</p>
+          <form id="loginForm" class="stack">
+            <label>อีเมล
+              <input id="loginEmail" type="email" autocomplete="email" required>
+            </label>
+            <label>รหัสผ่าน
+              <input id="loginPassword" type="password" autocomplete="current-password" required>
+            </label>
+            <button class="primary-btn" type="submit">เข้าสู่ระบบ</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="appView" class="hidden">
+        <header class="topbar">
+          <div>
+            <h2 id="viewTitle">คิวงาน</h2>
+            <p id="currentUserText">-</p>
+          </div>
+          <div class="status-pill" id="liveStatus">พร้อมใช้งาน</div>
+        </header>
+
+        <section id="queueView" class="view active-view">
+          <div class="grid two">
+            <form id="ticketForm" class="panel stack">
+              <h3>เพิ่ม Ticket</h3>
+              <label>ธุรกิจ
+                <select id="ticketBusiness" required>
+                  <option value="KFC">KFC</option>
+                  <option value="NonKFC">NonKFC</option>
+                </select>
+              </label>
+              <label>เลข Ticket
+                <input id="ticketNumber" maxlength="80" required>
+              </label>
+              <label>ส่งงานให้ T2
+                <select id="ticketAssignee" required></select>
+              </label>
+              <button class="primary-btn" type="submit">บันทึก Ticket</button>
+            </form>
+
+            <div class="panel">
+              <div class="panel-head">
+                <h3>T2 ที่ถึงคิว</h3>
+                <select id="queueBusiness">
+                  <option value="KFC">KFC</option>
+                  <option value="NonKFC">NonKFC</option>
+                </select>
+              </div>
+              <div id="nextT2" class="next-agent">-</div>
+              <div id="queueList" class="queue-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="peopleView" class="view">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>เพิ่ม/แก้ไขเวลาทำงาน T2</h3>
+            </div>
+            <form id="agentForm" class="agent-form">
+              <input id="agentId" type="hidden">
+              <label>ชื่อ T2
+                <input id="agentName" required placeholder="บังคับใส่ชื่อ">
+              </label>
+              <label>ธุรกิจ
+                <select id="agentBusiness" required>
+                  <option value="KFC">KFC</option>
+                  <option value="NonKFC">NonKFC</option>
+                </select>
+              </label>
+              <label>เข้างาน
+                <input id="agentStart" type="time" required>
+              </label>
+              <label>พักเริ่ม
+                <input id="agentBreakStart" type="time">
+              </label>
+              <label>พักจบ
+                <input id="agentBreakEnd" type="time">
+              </label>
+              <label>เลิกงาน
+                <input id="agentEnd" type="time" required>
+              </label>
+              <button class="primary-btn" type="submit">บันทึก</button>
+              <button class="ghost-btn" id="agentClearBtn" type="button">ล้างฟอร์ม</button>
+            </form>
+          </div>
+          <div class="table-wrap panel">
+            <table>
+              <thead>
+                <tr>
+                  <th>ชื่อ</th>
+                  <th>ธุรกิจ</th>
+                  <th>เวลาทำงาน</th>
+                  <th>พัก</th>
+                  <th>สถานะ</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="agentsTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="ticketsView" class="view">
+          <div class="panel">
+            <div class="toolbar">
+              <input id="filterText" placeholder="ค้นหา ticket / T1 / T2">
+              <select id="filterBusiness">
+                <option value="">ทุกธุรกิจ</option>
+                <option value="KFC">KFC</option>
+                <option value="NonKFC">NonKFC</option>
+              </select>
+              <select id="filterStatus">
+                <option value="">ทุกสถานะ</option>
+                <option value="open">เปิดอยู่</option>
+                <option value="closed">ปิดแล้ว</option>
+                <option value="reopened">เปิดใหม่</option>
+              </select>
+              <button id="deleteSelectedBtn" class="danger-btn" type="button">ลบที่เลือก</button>
+              <button id="exportBtn" class="primary-btn" type="button">Export Excel</button>
+              <button id="clearHistoryBtn" class="danger-btn wide" type="button">ล้างข้อมูล</button>
+            </div>
+          </div>
+          <div class="table-wrap panel">
+            <table>
+              <thead>
+                <tr>
+                  <th><input id="selectAllTickets" type="checkbox"></th>
+                  <th>Ticket</th>
+                  <th>ธุรกิจ</th>
+                  <th>T2</th>
+                  <th>รับงานจาก</th>
+                  <th>วันที่</th>
+                  <th>เวลา</th>
+                  <th>ปิดงาน</th>
+                  <th>เปิดใหม่</th>
+                  <th>สถานะ</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="ticketsTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="dashboardView" class="view">
+          <div class="grid three" id="dashboardCards"></div>
+          <div class="panel">
+            <h3>อันดับงานที่รับ</h3>
+            <div id="rankingList" class="ranking-list"></div>
+          </div>
+        </section>
+
+        <section id="usersView" class="view">
+          <div class="panel stack">
+            <h3>สร้าง User สำหรับ T1</h3>
+            <p class="muted">Admin สามารถสร้างบัญชี T1 หรือ Admin เพิ่มได้จากหน้านี้</p>
+            <form id="profileForm" class="agent-form">
+              <label>อีเมล
+                <input id="profileEmail" type="email" required>
+              </label>
+              <label>รหัสผ่าน
+                <input id="profilePassword" type="password" minlength="6" required>
+              </label>
+              <label>ชื่อ
+                <input id="profileName" required>
+              </label>
+              <label>Role
+                <select id="profileRole">
+                  <option value="t1">T1</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+              <button class="primary-btn" type="submit">บันทึกผู้ใช้งาน</button>
+            </form>
+          </div>
+          <div class="table-wrap panel">
+            <table>
+              <thead><tr><th>ชื่อ</th><th>Role</th><th>User ID</th><th></th></tr></thead>
+              <tbody id="profilesTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-card">
+      <h3 id="confirmTitle">ยืนยัน</h3>
+      <p id="confirmText">ต้องการดำเนินการต่อหรือไม่</p>
+      <div class="modal-actions">
+        <button id="confirmCancel" class="ghost-btn" type="button">ยกเลิก</button>
+        <button id="confirmOk" class="danger-btn" type="button">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

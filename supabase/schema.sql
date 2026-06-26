@@ -208,8 +208,8 @@ using (true);
 create policy "agents_write_authenticated"
 on public.agents for all
 to authenticated
-using (public.is_admin())
-with check (public.is_admin());
+using (true)
+with check (true);
 
 create policy "tickets_select_authenticated"
 on public.tickets for select

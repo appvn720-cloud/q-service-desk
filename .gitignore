@@ -1,0 +1,7 @@
+.agents/
+.vscode/
+.git-broken/
+node_modules/
+.netlify/
+.env
+.env.*

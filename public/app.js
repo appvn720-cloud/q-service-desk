@@ -27,25 +27,45 @@ const parseDigitalTime = (value) => {
   if (!raw) return "";
   const timeMatch = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
   if (timeMatch) {
-    return `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`;
+    const seconds = raw.split(":")[2] || "00";
+    return `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}:${seconds.padStart(2, "0")}`;
   }
   const digits = raw.replace(/\D/g, "");
+  if (digits.length <= 2) {
+    return digits;
+  }
   if (digits.length === 3) {
-    return `0${digits[0]}:${digits.slice(1)}`;
+    return `0${digits[0]}:${digits.slice(1)}:00`;
   }
   if (digits.length === 4) {
-    return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+    return `${digits.slice(0, 2)}:${digits.slice(2)}:00`;
+  }
+  if (digits.length === 5) {
+    return `0${digits[0]}:${digits.slice(1, 3)}:${digits.slice(3, 5)}`;
   }
   if (digits.length === 6) {
-    return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
+    return `${digits.slice(0, 2)}:${digits.slice(2, 4)}:${digits.slice(4, 6)}`;
   }
   return raw;
 };
 const displayTime = (value) => parseDigitalTime(value) || "-";
+const formatTimeInput = (value) => {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 6);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}:${digits.slice(2, 4)}:${digits.slice(4)}`;
+};
+const normalizeAgentTimes = (agent) => ({
+  ...agent,
+  work_start: parseDigitalTime(agent.work_start),
+  break_start: parseDigitalTime(agent.break_start),
+  break_end: parseDigitalTime(agent.break_end),
+  work_end: parseDigitalTime(agent.work_end)
+});
 const isValidDigitalTime = (value) => {
-  if (!/^\d{2}:\d{2}$/.test(value)) return false;
-  const [hour, minute] = value.split(":").map(Number);
-  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+  if (!/^\d{2}:\d{2}:\d{2}$/.test(value)) return false;
+  const [hour, minute, second] = value.split(":").map(Number);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 && second >= 0 && second <= 59;
 };
 const currentMinutes = () => {
   const d = new Date();
@@ -122,7 +142,7 @@ async function loadAll() {
     toast((e1 || e2 || e3).message, true);
     return;
   }
-  state.agents = agents || [];
+  state.agents = (agents || []).map(normalizeAgentTimes);
   state.tickets = tickets || [];
   state.profiles = profiles || [];
   renderAll();
@@ -178,7 +198,8 @@ function renderQueue() {
 }
 
 function renderAgents() {
-  $("agentsTable").innerHTML = state.agents.filter((a) => a.active && !agentStatus(a).ended).map((a) => {
+  const rows = state.agents.filter((a) => a.active);
+  $("agentsTable").innerHTML = rows.map((a) => {
     const s = agentStatus(a);
     return `
       <tr>
@@ -195,7 +216,11 @@ function renderAgents() {
         </td>
       </tr>
     `;
-  }).join("");
+  }).join("") || `
+    <tr>
+      <td colspan="6">ยังไม่มีข้อมูล T2</td>
+    </tr>
+  `;
 }
 
 function ticketMatches(t) {
@@ -312,10 +337,10 @@ async function saveAgent(event) {
   $("agentBreakEnd").value = breakEnd;
   $("agentEnd").value = workEnd;
   if (!isValidDigitalTime(workStart) || !isValidDigitalTime(workEnd)) {
-    return toast("กรุณาใส่เวลาเข้างานและเลิกงานเป็น HH:MM เช่น 08:00", true);
+    return toast("กรุณาใส่เวลาเข้างานและเลิกงานเป็น HH:MM:SS เช่น 08:00:00", true);
   }
   if ((breakStart && !isValidDigitalTime(breakStart)) || (breakEnd && !isValidDigitalTime(breakEnd))) {
-    return toast("กรุณาใส่เวลาพักเป็น HH:MM เช่น 12:00", true);
+    return toast("กรุณาใส่เวลาพักเป็น HH:MM:SS เช่น 12:00:00", true);
   }
   const payload = {
     name,
@@ -445,7 +470,7 @@ function bindEvents() {
   $("agentClearBtn").addEventListener("click", clearAgentForm);
   document.querySelectorAll(".digital-time").forEach((input) => {
     input.addEventListener("input", () => {
-      input.value = input.value.replace(/[^\d:]/g, "").slice(0, 5);
+      input.value = formatTimeInput(input.value);
     });
     input.addEventListener("blur", () => {
       input.value = parseDigitalTime(input.value);

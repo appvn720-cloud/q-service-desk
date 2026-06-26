@@ -71,17 +71,19 @@
               <button class="segment-btn" type="button" data-business-tab="NonKFC">NonKFC</button>
             </div>
           </div>
-          <div class="grid two">
+          <div class="queue-stack">
             <form id="ticketForm" class="panel stack">
               <h3>เพิ่ม Ticket <span id="ticketBusinessLabel">KFC</span></h3>
               <input id="ticketBusiness" type="hidden" value="KFC">
-              <label>เลข Ticket
-                <input id="ticketNumber" maxlength="80" required>
-              </label>
-              <label>ส่งงานให้ T2
-                <select id="ticketAssignee" required></select>
-              </label>
-              <button class="primary-btn" type="submit">บันทึก Ticket</button>
+              <div class="ticket-entry">
+                <label>เลข Ticket
+                  <input id="ticketNumber" maxlength="80" required>
+                </label>
+                <label>ส่งงานให้ T2
+                  <select id="ticketAssignee" required></select>
+                </label>
+                <button class="primary-btn" type="submit">บันทึก Ticket</button>
+              </div>
             </form>
 
             <div class="panel">

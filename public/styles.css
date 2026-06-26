@@ -370,6 +370,14 @@ p {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+#dashboardCards {
+  margin-bottom: 24px;
+}
+
+#dashboardView .panel {
+  margin-top: 0;
+}
+
 .queue-stack {
   display: grid;
   gap: 16px;
@@ -472,6 +480,7 @@ input[type="checkbox"] {
 
 .metric-card {
   display: grid;
+  min-height: 112px;
 }
 
 .metric-card strong {

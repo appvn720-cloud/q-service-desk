@@ -5,3 +5,5 @@ node_modules/
 .netlify/
 .env
 .env.*
+!.env.example
+__pycache__/

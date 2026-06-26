@@ -204,6 +204,33 @@ button {
   margin-bottom: 0;
 }
 
+.business-boards {
+  display: grid;
+  gap: 18px;
+}
+
+.business-board {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel) 82%, var(--panel-soft));
+}
+
+.business-board-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.business-board-head h3,
+.business-board-head p {
+  margin-bottom: 0;
+}
+
 h3 span {
   display: inline-block;
   margin-left: 6px;

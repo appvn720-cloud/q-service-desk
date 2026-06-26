@@ -9,8 +9,7 @@ const state = {
   agents: [],
   tickets: [],
   profiles: [],
-  selectedTickets: new Set(),
-  queueBusiness: "KFC"
+  selectedTickets: new Set()
 };
 
 const $ = (id) => document.getElementById(id);
@@ -170,19 +169,6 @@ function renderAll() {
   renderProfiles();
 }
 
-function setActiveBusiness(value) {
-  $("ticketBusiness").value = value;
-  $("queueBusiness").value = value;
-  $("ticketBusinessLabel").textContent = value;
-  $("queueBusinessLabel").textContent = value;
-  state.queueBusiness = value;
-  document.querySelectorAll("[data-business-tab]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.businessTab === value);
-  });
-  renderAssignees();
-  renderQueue();
-}
-
 function setBusinessPicker(group, value) {
   const input = $(`${group}Business`);
   if (input) input.value = value;
@@ -192,22 +178,30 @@ function setBusinessPicker(group, value) {
 }
 
 function renderAssignees() {
-  const select = $("ticketAssignee");
-  const agents = sortedQueue($("ticketBusiness").value);
-  select.innerHTML = agents.length
-    ? agents.map((a) => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join("")
-    : `<option value="">ไม่มี T2 ที่พร้อมรับงาน</option>`;
+  document.querySelectorAll("[data-ticket-form]").forEach((form) => {
+    const select = form.querySelector(".ticket-assignee");
+    const agents = sortedQueue(form.dataset.business);
+    select.innerHTML = agents.length
+      ? agents.map((a) => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join("")
+      : `<option value="">ไม่มี T2 ที่พร้อมรับงาน</option>`;
+  });
 }
 
 function renderQueue() {
-  const queue = sortedQueue(state.queueBusiness);
-  $("nextT2").textContent = queue[0]?.name || "ไม่มี T2 ที่พร้อมรับงาน";
-  $("queueList").innerHTML = queue.map((a, index) => `
-    <div class="queue-item">
-      <span>${index + 1}. ${escapeHtml(a.name)}</span>
-      <span>${a.open_count || 0} งานเปิด</span>
-    </div>
-  `).join("") || `<div class="queue-item"><span>ไม่มีคิวว่าง</span><span>-</span></div>`;
+  ["KFC", "NonKFC"].forEach((business) => {
+    const queue = sortedQueue(business);
+    const next = document.querySelector(`[data-next-t2="${business}"]`);
+    const list = document.querySelector(`[data-queue-list="${business}"]`);
+    if (next) next.textContent = queue[0]?.name || "ไม่มี T2 ที่พร้อมรับงาน";
+    if (list) {
+      list.innerHTML = queue.map((a, index) => `
+        <div class="queue-item">
+          <span>${index + 1}. ${escapeHtml(a.name)}</span>
+          <span>${a.open_count || 0} งานเปิด</span>
+        </div>
+      `).join("") || `<div class="queue-item"><span>ไม่มีคิวว่าง</span><span>-</span></div>`;
+    }
+  });
 }
 
 function renderAgents() {
@@ -310,11 +304,15 @@ function escapeHtml(value) {
 
 async function createTicket(event) {
   event.preventDefault();
-  const agent = state.agents.find((a) => a.id === $("ticketAssignee").value);
+  const form = event.currentTarget;
+  const business = form.dataset.business;
+  const ticketInput = form.querySelector(".ticket-number");
+  const assigneeSelect = form.querySelector(".ticket-assignee");
+  const agent = state.agents.find((a) => a.id === assigneeSelect.value);
   if (!agent) return toast("ไม่มี T2 ที่พร้อมรับงาน", true);
   const ticket = {
-    ticket_number: $("ticketNumber").value.trim(),
-    business: $("ticketBusiness").value,
+    ticket_number: ticketInput.value.trim(),
+    business,
     assignee_id: agent.id,
     assignee_name: agent.name,
     created_by: state.profile.id,
@@ -332,7 +330,7 @@ async function createTicket(event) {
     p_created_by_name: ticket.created_by_name
   });
   if (error) return toast(error.message, true);
-  $("ticketNumber").value = "";
+  ticketInput.value = "";
   toast("บันทึก Ticket แล้ว");
   await loadAll();
 }
@@ -466,10 +464,7 @@ function bindEvents() {
     localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
   });
   document.querySelectorAll(".nav-item").forEach((btn) => btn.addEventListener("click", () => showView(btn.dataset.view)));
-  $("ticketForm").addEventListener("submit", createTicket);
-  document.querySelectorAll("[data-business-tab]").forEach((btn) => btn.addEventListener("click", () => {
-    setActiveBusiness(btn.dataset.businessTab);
-  }));
+  document.querySelectorAll("[data-ticket-form]").forEach((form) => form.addEventListener("submit", createTicket));
   document.querySelectorAll("[data-agent-business]").forEach((btn) => btn.addEventListener("click", () => {
     setBusinessPicker("agent", btn.dataset.agentBusiness);
   }));

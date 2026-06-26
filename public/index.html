@@ -61,39 +61,60 @@
         </header>
 
         <section id="queueView" class="view active-view">
-          <div class="panel business-switch">
-            <div>
-              <h3>ธุรกิจ</h3>
-              <p class="muted">เลือกธุรกิจที่ต้องการจัดคิว</p>
-            </div>
-            <div class="business-picker large" aria-label="เลือกธุรกิจสำหรับจัดคิว">
-              <button class="segment-btn active" type="button" data-business-tab="KFC">KFC</button>
-              <button class="segment-btn" type="button" data-business-tab="NonKFC">NonKFC</button>
-            </div>
-          </div>
-          <div class="queue-stack">
-            <form id="ticketForm" class="panel stack">
-              <h3>เพิ่ม Ticket <span id="ticketBusinessLabel">KFC</span></h3>
-              <input id="ticketBusiness" type="hidden" value="KFC">
-              <div class="ticket-entry">
-                <label>เลข Ticket
-                  <input id="ticketNumber" maxlength="80" required>
-                </label>
-                <label>ส่งงานให้ T2
-                  <select id="ticketAssignee" required></select>
-                </label>
-                <button class="primary-btn" type="submit">บันทึก Ticket</button>
+          <div class="business-boards">
+            <section class="business-board" data-business-section="KFC">
+              <div class="business-board-head">
+                <h3>KFC</h3>
+                <p class="muted">คิวงานและ Ticket ของ KFC</p>
               </div>
-            </form>
+              <form class="panel stack ticket-form" data-ticket-form data-business="KFC">
+                <h3>เพิ่ม Ticket <span>KFC</span></h3>
+                <div class="ticket-entry">
+                  <label>เลข Ticket
+                    <input class="ticket-number" maxlength="80" required>
+                  </label>
+                  <label>ส่งงานให้ T2
+                    <select class="ticket-assignee" required></select>
+                  </label>
+                  <button class="primary-btn" type="submit">บันทึก Ticket</button>
+                </div>
+              </form>
 
-            <div class="panel">
-              <div class="panel-head">
-                <h3>T2 ที่ถึงคิว <span id="queueBusinessLabel">KFC</span></h3>
-                <input id="queueBusiness" type="hidden" value="KFC">
+              <div class="panel">
+                <div class="panel-head">
+                  <h3>T2 ที่ถึงคิว <span>KFC</span></h3>
+                </div>
+                <div class="next-agent" data-next-t2="KFC">-</div>
+                <div class="queue-list" data-queue-list="KFC"></div>
               </div>
-              <div id="nextT2" class="next-agent">-</div>
-              <div id="queueList" class="queue-list"></div>
-            </div>
+            </section>
+
+            <section class="business-board" data-business-section="NonKFC">
+              <div class="business-board-head">
+                <h3>NonKFC</h3>
+                <p class="muted">คิวงานและ Ticket ของ NonKFC</p>
+              </div>
+              <form class="panel stack ticket-form" data-ticket-form data-business="NonKFC">
+                <h3>เพิ่ม Ticket <span>NonKFC</span></h3>
+                <div class="ticket-entry">
+                  <label>เลข Ticket
+                    <input class="ticket-number" maxlength="80" required>
+                  </label>
+                  <label>ส่งงานให้ T2
+                    <select class="ticket-assignee" required></select>
+                  </label>
+                  <button class="primary-btn" type="submit">บันทึก Ticket</button>
+                </div>
+              </form>
+
+              <div class="panel">
+                <div class="panel-head">
+                  <h3>T2 ที่ถึงคิว <span>NonKFC</span></h3>
+                </div>
+                <div class="next-agent" data-next-t2="NonKFC">-</div>
+                <div class="queue-list" data-queue-list="NonKFC"></div>
+              </div>
+            </section>
           </div>
         </section>
 

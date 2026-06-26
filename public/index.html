@@ -125,13 +125,14 @@
             </div>
             <form id="agentForm" class="agent-form">
               <input id="agentId" type="hidden">
-              <div class="business-picker form-span" aria-label="เลือกธุรกิจสำหรับ T2">
-                <input id="agentBusiness" type="hidden" value="KFC">
-                <button class="segment-btn active" type="button" data-agent-business="KFC">KFC</button>
-                <button class="segment-btn" type="button" data-agent-business="NonKFC">NonKFC</button>
-              </div>
               <label>ชื่อ T2
                 <input id="agentName" required placeholder="บังคับใส่ชื่อ">
+              </label>
+              <label>ธุรกิจ
+                <select id="agentBusiness" required>
+                  <option value="KFC">KFC</option>
+                  <option value="NonKFC">NonKFC</option>
+                </select>
               </label>
               <label>เข้างาน
                 <input id="agentStart" class="digital-time" type="text" inputmode="numeric" maxlength="8" placeholder="08:00:00" autocomplete="off" required>

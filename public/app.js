@@ -375,7 +375,7 @@ async function saveAgent(event) {
 
 function clearAgentForm() {
   ["agentId", "agentName", "agentStart", "agentBreakStart", "agentBreakEnd", "agentEnd"].forEach((id) => $(id).value = "");
-  setBusinessPicker("agent", "KFC");
+  $("agentBusiness").value = "KFC";
 }
 
 async function updateTicketStatus(id, status) {
@@ -465,9 +465,6 @@ function bindEvents() {
   });
   document.querySelectorAll(".nav-item").forEach((btn) => btn.addEventListener("click", () => showView(btn.dataset.view)));
   document.querySelectorAll("[data-ticket-form]").forEach((form) => form.addEventListener("submit", createTicket));
-  document.querySelectorAll("[data-agent-business]").forEach((btn) => btn.addEventListener("click", () => {
-    setBusinessPicker("agent", btn.dataset.agentBusiness);
-  }));
   $("agentForm").addEventListener("submit", saveAgent);
   $("agentClearBtn").addEventListener("click", clearAgentForm);
   document.querySelectorAll(".digital-time").forEach((input) => {
@@ -524,7 +521,7 @@ async function handleDocumentClick(event) {
     if (!a) return;
     $("agentId").value = a.id;
     $("agentName").value = a.name;
-    setBusinessPicker("agent", a.business);
+    $("agentBusiness").value = a.business;
     $("agentStart").value = parseDigitalTime(a.work_start);
     $("agentBreakStart").value = parseDigitalTime(a.break_start);
     $("agentBreakEnd").value = parseDigitalTime(a.break_end);

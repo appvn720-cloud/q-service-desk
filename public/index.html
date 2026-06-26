@@ -61,14 +61,20 @@
         </header>
 
         <section id="queueView" class="view active-view">
+          <div class="panel business-switch">
+            <div>
+              <h3>ธุรกิจ</h3>
+              <p class="muted">เลือกธุรกิจที่ต้องการจัดคิว</p>
+            </div>
+            <div class="business-picker large" aria-label="เลือกธุรกิจสำหรับจัดคิว">
+              <button class="segment-btn active" type="button" data-business-tab="KFC">KFC</button>
+              <button class="segment-btn" type="button" data-business-tab="NonKFC">NonKFC</button>
+            </div>
+          </div>
           <div class="grid two">
             <form id="ticketForm" class="panel stack">
-              <h3>เพิ่ม Ticket</h3>
-              <div class="business-picker" aria-label="เลือกธุรกิจสำหรับ Ticket">
-                <input id="ticketBusiness" type="hidden" value="KFC">
-                <button class="segment-btn active" type="button" data-ticket-business="KFC">KFC</button>
-                <button class="segment-btn" type="button" data-ticket-business="NonKFC">NonKFC</button>
-              </div>
+              <h3>เพิ่ม Ticket <span id="ticketBusinessLabel">KFC</span></h3>
+              <input id="ticketBusiness" type="hidden" value="KFC">
               <label>เลข Ticket
                 <input id="ticketNumber" maxlength="80" required>
               </label>
@@ -80,12 +86,8 @@
 
             <div class="panel">
               <div class="panel-head">
-                <h3>T2 ที่ถึงคิว</h3>
-                <div class="business-picker compact" aria-label="เลือกธุรกิจสำหรับคิว">
-                  <input id="queueBusiness" type="hidden" value="KFC">
-                  <button class="segment-btn active" type="button" data-queue-business="KFC">KFC</button>
-                  <button class="segment-btn" type="button" data-queue-business="NonKFC">NonKFC</button>
-                </div>
+                <h3>T2 ที่ถึงคิว <span id="queueBusinessLabel">KFC</span></h3>
+                <input id="queueBusiness" type="hidden" value="KFC">
               </div>
               <div id="nextT2" class="next-agent">-</div>
               <div id="queueList" class="queue-list"></div>

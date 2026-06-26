@@ -170,6 +170,19 @@ function renderAll() {
   renderProfiles();
 }
 
+function setActiveBusiness(value) {
+  $("ticketBusiness").value = value;
+  $("queueBusiness").value = value;
+  $("ticketBusinessLabel").textContent = value;
+  $("queueBusinessLabel").textContent = value;
+  state.queueBusiness = value;
+  document.querySelectorAll("[data-business-tab]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.businessTab === value);
+  });
+  renderAssignees();
+  renderQueue();
+}
+
 function setBusinessPicker(group, value) {
   const input = $(`${group}Business`);
   if (input) input.value = value;
@@ -454,14 +467,8 @@ function bindEvents() {
   });
   document.querySelectorAll(".nav-item").forEach((btn) => btn.addEventListener("click", () => showView(btn.dataset.view)));
   $("ticketForm").addEventListener("submit", createTicket);
-  document.querySelectorAll("[data-ticket-business]").forEach((btn) => btn.addEventListener("click", () => {
-    setBusinessPicker("ticket", btn.dataset.ticketBusiness);
-    renderAssignees();
-  }));
-  document.querySelectorAll("[data-queue-business]").forEach((btn) => btn.addEventListener("click", () => {
-    setBusinessPicker("queue", btn.dataset.queueBusiness);
-    state.queueBusiness = btn.dataset.queueBusiness;
-    renderQueue();
+  document.querySelectorAll("[data-business-tab]").forEach((btn) => btn.addEventListener("click", () => {
+    setActiveBusiness(btn.dataset.businessTab);
   }));
   document.querySelectorAll("[data-agent-business]").forEach((btn) => btn.addEventListener("click", () => {
     setBusinessPicker("agent", btn.dataset.agentBusiness);

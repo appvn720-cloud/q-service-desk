@@ -183,9 +183,31 @@ button {
   min-width: 210px;
 }
 
+.business-picker.large {
+  min-width: min(360px, 100%);
+}
+
 .business-picker.form-span {
   grid-column: 1 / -1;
   width: min(360px, 100%);
+}
+
+.business-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.business-switch h3,
+.business-switch p {
+  margin-bottom: 0;
+}
+
+h3 span {
+  display: inline-block;
+  margin-left: 6px;
+  color: var(--primary);
 }
 
 .segment-btn {
@@ -501,6 +523,7 @@ td select {
 
   .topbar,
   .panel-head,
+  .business-switch,
   .toolbar {
     align-items: stretch;
     flex-direction: column;

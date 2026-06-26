@@ -13,6 +13,7 @@
   --ok: #178f5f;
   --warn: #b7791f;
   --shadow: 0 14px 34px rgba(31, 42, 68, .12);
+  --page-pad: 34px;
 }
 
 body.dark {
@@ -43,6 +44,29 @@ body {
   font-family: "Segoe UI", Tahoma, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: 10px;
+  padding: 3px;
+  background: linear-gradient(90deg, #ff3b5f, #ffb000, #35d86b, #20c7ff, #7c5cff, #ff3bcb, #ff3b5f);
+  background-size: 320% 100%;
+  animation: rainbowBorder 7s linear infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+@keyframes rainbowBorder {
+  to {
+    background-position: 320% 0;
+  }
 }
 
 button,
@@ -206,13 +230,13 @@ button {
 
 .business-boards {
   display: grid;
-  gap: 18px;
+  gap: 24px;
 }
 
 .business-board {
   display: grid;
-  gap: 12px;
-  padding: 16px;
+  gap: 16px;
+  padding: 22px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: color-mix(in srgb, var(--panel) 82%, var(--panel-soft));
@@ -261,7 +285,7 @@ h3 span {
 
 .main {
   min-width: 0;
-  padding: 28px;
+  padding: var(--page-pad);
 }
 
 .notice {
@@ -308,7 +332,7 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .topbar h2,
@@ -359,8 +383,8 @@ p {
 }
 
 .panel {
-  padding: 18px;
-  margin-bottom: 16px;
+  padding: 22px;
+  margin-bottom: 22px;
 }
 
 .panel-head,
@@ -419,8 +443,8 @@ input[type="checkbox"] {
 }
 
 .next-agent {
-  margin: 22px 0;
-  padding: 20px;
+  margin: 26px 0;
+  padding: 24px;
   border-radius: 8px;
   background: var(--panel-soft);
   font-size: 32px;
@@ -457,6 +481,7 @@ input[type="checkbox"] {
 .table-wrap {
   overflow-x: auto;
   padding: 0;
+  margin-top: 18px;
 }
 
 table {
@@ -467,7 +492,7 @@ table {
 
 th,
 td {
-  padding: 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: middle;
@@ -560,8 +585,12 @@ td select {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --page-pad: 18px;
+  }
+
   .main {
-    padding: 16px;
+    padding: var(--page-pad);
   }
 
   .topbar,
